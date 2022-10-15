@@ -106,7 +106,7 @@ public class TicTacToe{
         return true;
     }
 
-    public void click(Scanner sc){
+    public int click(Scanner sc){
         int clicked = 0;
         do{
             clicked = sc.nextInt();
@@ -114,7 +114,11 @@ public class TicTacToe{
         clicked--;//to match with the 0 - 8 cases (the user sees 1-9)
         int line = clicked/3;
         int col = clicked % 3;
-        tictac[2 -line][col] = turn;
+        if(tictac[2 -line][col] == 0){//assert the selected position isn't already occuped
+            tictac[2 -line][col] = turn;
+            return 1;
+        }
+        return 0; //0 if nothing had been clicked
     }
 
     public void printTurn(){
@@ -125,19 +129,36 @@ public class TicTacToe{
         }
     }
 
+    public void printWinner(int e){
+        if(e == 1){
+            System.out.println("X is winner !\n");
+        }else if(e == 2){
+            System.out.println("O is winner !\n");
+        }else if(e == 0){
+            System.out.println("equality -_-\n");
+        }
+    }
+
     public void party(){
         Random r = new Random(System.currentTimeMillis());
         turn = 1 + r.nextInt() % 2;
         Scanner scan = new Scanner(System.in);
-        while(!full()){
-            printRaw();
+        int i;
+        int winner;
+        do{
+           //printRaw();
             printTurn();
             System.out.println(this);
-            click(scan);
+            i = click(scan);//in order to stay in the current turn if the posistion isn't good
             //System.out.println(this);
-            nextTurn();
-        }
+            if(i == 1){
+                nextTurn();
+            }
+            winner = winDetection();
+        }while(!full() && (winner == 0));
         scan.close();
+        System.out.println(this);
+        printWinner(winner);
     }
 
     public void printRaw(){
@@ -150,11 +171,49 @@ public class TicTacToe{
         System.out.printf("%d\n", turn);
     }
 
+    /**
+     * @return 0 if no win ; 1 if X is winner ; 2 if O is winner
+     */
+    public int winDetection(){
+        //detection of the middle box :
+        int m = tictac[1][1];//set in memory the player in the middle box
+        if(m == 1 || m == 2){
+            if(tictac[0][1] == m && tictac[0][2] == m){
+                return m;   //the middle column is full of the same player
+            }
+            if(tictac[1][0] == m && tictac[1][2] == m){
+                return m;   //the middle line is full of the same player
+            }
+            if(tictac[0][0] == m && tictac[2][2] == m){
+                return m;   //the principal diagonal is full of the same player
+            }
+            if(tictac[2][2] == m && tictac[0][2] == m){
+                return m;   //the secondary diagonal is full of the same player
+            }
+        }
 
+        m = tictac[0][0];//set in memory the player in the left upper corner
+        if(m == 1 || m == 2){
+            if(tictac[0][1] == m && tictac[0][2] == m){
+                return m;   //the upper line is full of the same player
+            }
+            if(tictac[1][0] == m && tictac[2][0] == m){
+                return m;   //the left column is full of the same player
+            }
+        }
 
-
-
-
+        m = tictac[2][2];//set in memory the player in the right down corner
+        if(m == 1 || m == 2){
+            if(tictac[2][0] == m && tictac[2][1] == m){
+                return m;   //the downer line is full of the same player
+            }
+                if(tictac[0][2] == m && tictac[1][2] == m){
+                    return m;   //the right column is full of the same player
+            }
+        }
+        //if no win detected, return 0 :
+        return 0;
+    }
 }
 
 
